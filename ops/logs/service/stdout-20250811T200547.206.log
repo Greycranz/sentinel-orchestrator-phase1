@@ -1,0 +1,5 @@
+INFO:     127.0.0.1:51644 - "GET /healthz HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51644 - "POST /tenants HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51644 - "POST /tenants HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51644 - "GET /tenants HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51644 - "GET /tenants/1 HTTP/1.1" 200 OK

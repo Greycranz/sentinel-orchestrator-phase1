@@ -1,0 +1,41 @@
+import time
+from typing import Callable
+from fastapi import Request, HTTPException
+from starlette.middleware.base import BaseHTTPMiddleware
+from .metrics_speedops import request_latency, requests_total
+from .db import get_apikey_by_value, touch_apikey_usage
+from .auth import _consume_token
+
+SECURED_PREFIXES = ("/tasks", "/tenants", "/metrics", "/tools")
+
+class TimingAndAuthMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next: Callable):
+        start = time.perf_counter()
+        path = request.url.path
+        method = request.method
+        code = 500
+        try:
+            if path.startswith(SECURED_PREFIXES):
+                needs_key = True
+                if (path == "/tenants" and method == "GET") or (path == "/tools/registry" and method == "GET"):
+                    needs_key = False
+                if needs_key:
+                    api_key = request.headers.get("X-API-Key")
+                    if not api_key:
+                        raise HTTPException(status_code=401, detail="Missing X-API-Key")
+                    row = get_apikey_by_value(api_key)
+                    if not row or not row.get("is_active"):
+                        raise HTTPException(status_code=401, detail="Invalid API key")
+                    if not _consume_token(api_key):
+                        raise HTTPException(status_code=429, detail="Rate limit exceeded")
+                    touch_apikey_usage(row["id"])
+            response = await call_next(request)
+            code = response.status_code
+            return response
+        finally:
+            dur = time.perf_counter() - start
+            try:
+                request_latency.labels(path=path, method=method).observe(dur)
+                requests_total.labels(path=path, method=method, code=str(code)).inc()
+            except Exception:
+                pass

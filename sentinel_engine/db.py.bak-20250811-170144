@@ -1,0 +1,16 @@
+﻿from sqlalchemy import create_engine
+from sqlalchemy.engine import Engine
+import os
+
+_engine: Engine | None = None
+
+def get_engine() -> Engine:
+    global _engine
+    if _engine is not None:
+        return _engine
+    base = os.path.dirname(os.path.dirname(__file__))
+    db_path = os.path.join(base, "ops", "data")
+    os.makedirs(db_path, exist_ok=True)
+    uri = f"sqlite:///{os.path.join(db_path, 'sentinel.sqlite')}"
+    _engine = create_engine(uri, future=True)
+    return _engine

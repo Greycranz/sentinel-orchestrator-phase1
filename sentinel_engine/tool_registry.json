@@ -1,0 +1,28 @@
+{
+  "tools": [
+    {
+      "name": "unreal_engine",
+      "kind": "engine",
+      "status": "beta"
+    },
+    {
+      "name": "video_gen_generic",
+      "kind": "generator",
+      "status": "candidate"
+    },
+    {
+      "name": "env_walker_generic",
+      "kind": "navigator",
+      "status": "candidate"
+    },
+    {
+      "status": "candidate",
+      "name": "sota_video_gen_v3",
+      "kind": "generator"
+    }
+  ],
+  "policy": {
+    "accept_only_free": true,
+    "sandbox_required": true
+  }
+}

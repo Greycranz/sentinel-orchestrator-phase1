@@ -1,0 +1,20 @@
+from fastapi import Header, HTTPException
+from .keys import get_key
+
+def _ok(key: str|None, want: str) -> bool:
+    if not key: return False
+    if key == want: return True
+    kl = key.lower()
+    if kl.startswith("bearer "):
+        return key[7:] == want
+    return False
+
+def guard_api_key(x_api_key: str | None = Header(default=None),
+                  authorization: str | None = Header(default=None)):
+    want = get_key()
+    if not want:
+        # dev mode: no key present -> allow
+        return True
+    if _ok(x_api_key, want) or _ok(authorization, want):
+        return True
+    raise HTTPException(status_code=401, detail="Unauthorized")

@@ -1,0 +1,336 @@
+20250814-201320 starting sentinel agent
+agent: using API key from process env: sup****************-me
+20250814-201326 starting sentinel agent
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 1): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 2): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 3): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 4): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 5): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 6): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 7): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 8): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 9): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 10): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 11): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 12): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 13): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 14): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 15): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 16): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 17): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 18): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 19): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 20): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 21): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 22): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 23): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 24): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 25): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 26): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 27): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 28): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 29): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 30): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 31): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 32): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 33): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 34): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 35): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 36): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 37): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 38): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 39): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 40): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 41): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 42): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 43): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 44): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 45): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 46): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 47): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 48): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 49): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 50): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 51): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 52): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 53): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 54): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 55): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 56): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 57): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 58): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 59): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 60): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 61): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 62): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 63): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 64): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 65): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 66): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 67): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 68): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 69): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 70): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 71): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 72): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 73): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 74): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 75): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 76): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 77): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 78): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 79): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 80): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 81): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 82): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 83): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 84): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 85): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: Response status code does not indicate success: 500 (Internal Server Error).
+REGISTRATION FAILED (attempt 86): Response status code does not indicate success: 500 (Internal Server Error).
+POST http://127.0.0.1:8001/v0/agents/register failed: Response status code does not indicate success: 500 (Internal Server Error).
+REGISTRATION FAILED (attempt 87): Response status code does not indicate success: 500 (Internal Server Error).
+POST http://127.0.0.1:8001/v0/agents/register failed: Response status code does not indicate success: 500 (Internal Server Error).
+REGISTRATION FAILED (attempt 88): Response status code does not indicate success: 500 (Internal Server Error).
+POST http://127.0.0.1:8001/v0/agents/register failed: Response status code does not indicate success: 500 (Internal Server Error).
+REGISTRATION FAILED (attempt 89): Response status code does not indicate success: 500 (Internal Server Error).
+POST http://127.0.0.1:8001/v0/agents/register failed: Response status code does not indicate success: 500 (Internal Server Error).
+REGISTRATION FAILED (attempt 90): Response status code does not indicate success: 500 (Internal Server Error).
+POST http://127.0.0.1:8001/v0/agents/register failed: Response status code does not indicate success: 500 (Internal Server Error).
+REGISTRATION FAILED (attempt 91): Response status code does not indicate success: 500 (Internal Server Error).
+POST http://127.0.0.1:8001/v0/agents/register failed: Response status code does not indicate success: 500 (Internal Server Error).
+REGISTRATION FAILED (attempt 92): Response status code does not indicate success: 500 (Internal Server Error).
+POST http://127.0.0.1:8001/v0/agents/register failed: Response status code does not indicate success: 500 (Internal Server Error).
+REGISTRATION FAILED (attempt 93): Response status code does not indicate success: 500 (Internal Server Error).
+POST http://127.0.0.1:8001/v0/agents/register failed: Response status code does not indicate success: 500 (Internal Server Error).
+REGISTRATION FAILED (attempt 94): Response status code does not indicate success: 500 (Internal Server Error).
+POST http://127.0.0.1:8001/v0/agents/register failed: Response status code does not indicate success: 500 (Internal Server Error).
+REGISTRATION FAILED (attempt 95): Response status code does not indicate success: 500 (Internal Server Error).
+POST http://127.0.0.1:8001/v0/agents/register failed: Response status code does not indicate success: 500 (Internal Server Error).
+REGISTRATION FAILED (attempt 96): Response status code does not indicate success: 500 (Internal Server Error).
+POST http://127.0.0.1:8001/v0/agents/register failed: Response status code does not indicate success: 500 (Internal Server Error).
+REGISTRATION FAILED (attempt 97): Response status code does not indicate success: 500 (Internal Server Error).
+POST http://127.0.0.1:8001/v0/agents/register failed: Response status code does not indicate success: 500 (Internal Server Error).
+REGISTRATION FAILED (attempt 98): Response status code does not indicate success: 500 (Internal Server Error).
+POST http://127.0.0.1:8001/v0/agents/register failed: Response status code does not indicate success: 500 (Internal Server Error).
+REGISTRATION FAILED (attempt 99): Response status code does not indicate success: 500 (Internal Server Error).
+POST http://127.0.0.1:8001/v0/agents/register failed: Response status code does not indicate success: 500 (Internal Server Error).
+REGISTRATION FAILED (attempt 100): Response status code does not indicate success: 500 (Internal Server Error).
+POST http://127.0.0.1:8001/v0/agents/register failed: Response status code does not indicate success: 500 (Internal Server Error).
+REGISTRATION FAILED (attempt 101): Response status code does not indicate success: 500 (Internal Server Error).
+POST http://127.0.0.1:8001/v0/agents/register failed: Response status code does not indicate success: 500 (Internal Server Error).
+REGISTRATION FAILED (attempt 102): Response status code does not indicate success: 500 (Internal Server Error).
+POST http://127.0.0.1:8001/v0/agents/register failed: Response status code does not indicate success: 500 (Internal Server Error).
+REGISTRATION FAILED (attempt 103): Response status code does not indicate success: 500 (Internal Server Error).
+POST http://127.0.0.1:8001/v0/agents/register failed: Response status code does not indicate success: 500 (Internal Server Error).
+REGISTRATION FAILED (attempt 104): Response status code does not indicate success: 500 (Internal Server Error).
+POST http://127.0.0.1:8001/v0/agents/register failed: Response status code does not indicate success: 500 (Internal Server Error).
+REGISTRATION FAILED (attempt 105): Response status code does not indicate success: 500 (Internal Server Error).
+POST http://127.0.0.1:8001/v0/agents/register failed: Response status code does not indicate success: 500 (Internal Server Error).
+REGISTRATION FAILED (attempt 106): Response status code does not indicate success: 500 (Internal Server Error).
+POST http://127.0.0.1:8001/v0/agents/register failed: Response status code does not indicate success: 500 (Internal Server Error).
+REGISTRATION FAILED (attempt 107): Response status code does not indicate success: 500 (Internal Server Error).
+POST http://127.0.0.1:8001/v0/agents/register failed: Response status code does not indicate success: 500 (Internal Server Error).
+REGISTRATION FAILED (attempt 108): Response status code does not indicate success: 500 (Internal Server Error).
+POST http://127.0.0.1:8001/v0/agents/register failed: Response status code does not indicate success: 500 (Internal Server Error).
+REGISTRATION FAILED (attempt 109): Response status code does not indicate success: 500 (Internal Server Error).
+POST http://127.0.0.1:8001/v0/agents/register failed: Response status code does not indicate success: 500 (Internal Server Error).
+REGISTRATION FAILED (attempt 110): Response status code does not indicate success: 500 (Internal Server Error).
+POST http://127.0.0.1:8001/v0/agents/register failed: Response status code does not indicate success: 500 (Internal Server Error).
+REGISTRATION FAILED (attempt 111): Response status code does not indicate success: 500 (Internal Server Error).
+POST http://127.0.0.1:8001/v0/agents/register failed: Response status code does not indicate success: 500 (Internal Server Error).
+REGISTRATION FAILED (attempt 112): Response status code does not indicate success: 500 (Internal Server Error).
+POST http://127.0.0.1:8001/v0/agents/register failed: Response status code does not indicate success: 500 (Internal Server Error).
+REGISTRATION FAILED (attempt 113): Response status code does not indicate success: 500 (Internal Server Error).
+POST http://127.0.0.1:8001/v0/agents/register failed: Response status code does not indicate success: 500 (Internal Server Error).
+REGISTRATION FAILED (attempt 114): Response status code does not indicate success: 500 (Internal Server Error).
+POST http://127.0.0.1:8001/v0/agents/register failed: Response status code does not indicate success: 500 (Internal Server Error).
+REGISTRATION FAILED (attempt 115): Response status code does not indicate success: 500 (Internal Server Error).
+POST http://127.0.0.1:8001/v0/agents/register failed: Response status code does not indicate success: 500 (Internal Server Error).
+REGISTRATION FAILED (attempt 116): Response status code does not indicate success: 500 (Internal Server Error).
+POST http://127.0.0.1:8001/v0/agents/register failed: Response status code does not indicate success: 500 (Internal Server Error).
+REGISTRATION FAILED (attempt 117): Response status code does not indicate success: 500 (Internal Server Error).
+POST http://127.0.0.1:8001/v0/agents/register failed: Response status code does not indicate success: 500 (Internal Server Error).
+REGISTRATION FAILED (attempt 118): Response status code does not indicate success: 500 (Internal Server Error).
+POST http://127.0.0.1:8001/v0/agents/register failed: Response status code does not indicate success: 500 (Internal Server Error).
+REGISTRATION FAILED (attempt 119): Response status code does not indicate success: 500 (Internal Server Error).
+POST http://127.0.0.1:8001/v0/agents/register failed: Response status code does not indicate success: 500 (Internal Server Error).
+REGISTRATION FAILED (attempt 120): Response status code does not indicate success: 500 (Internal Server Error).
+POST http://127.0.0.1:8001/v0/agents/register failed: Response status code does not indicate success: 500 (Internal Server Error).
+REGISTRATION FAILED (attempt 121): Response status code does not indicate success: 500 (Internal Server Error).
+POST http://127.0.0.1:8001/v0/agents/register failed: Response status code does not indicate success: 500 (Internal Server Error).
+REGISTRATION FAILED (attempt 122): Response status code does not indicate success: 500 (Internal Server Error).
+POST http://127.0.0.1:8001/v0/agents/register failed: Response status code does not indicate success: 500 (Internal Server Error).
+REGISTRATION FAILED (attempt 123): Response status code does not indicate success: 500 (Internal Server Error).
+POST http://127.0.0.1:8001/v0/agents/register failed: Response status code does not indicate success: 500 (Internal Server Error).
+REGISTRATION FAILED (attempt 124): Response status code does not indicate success: 500 (Internal Server Error).
+POST http://127.0.0.1:8001/v0/agents/register failed: Response status code does not indicate success: 500 (Internal Server Error).
+REGISTRATION FAILED (attempt 125): Response status code does not indicate success: 500 (Internal Server Error).
+POST http://127.0.0.1:8001/v0/agents/register failed: Response status code does not indicate success: 500 (Internal Server Error).
+REGISTRATION FAILED (attempt 126): Response status code does not indicate success: 500 (Internal Server Error).
+POST http://127.0.0.1:8001/v0/agents/register failed: Response status code does not indicate success: 500 (Internal Server Error).
+REGISTRATION FAILED (attempt 127): Response status code does not indicate success: 500 (Internal Server Error).
+agent_id: 9841fde0-5dac-4f38-813c-63367c1cf1a9 (registered on attempt 128)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/heartbeat failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)

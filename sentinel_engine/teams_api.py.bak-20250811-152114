@@ -1,0 +1,49 @@
+from fastapi import APIRouter, HTTPException
+from sqlalchemy import text
+from typing import List, Dict, Any
+from .db import engine, now_iso
+
+router_teams = APIRouter()
+
+@router_teams.get("/teams")
+def list_teams() -> List[Dict[str, Any]]:
+    with engine.begin() as conn:
+        rows = conn.execute(text("SELECT * FROM teams ORDER BY name ASC")).mappings().all()
+        return [dict(r) for r in rows]
+
+@router_teams.post("/teams")
+def create_team(name: str, description: str = ""):
+    with engine.begin() as conn:
+        try:
+            conn.execute(text(
+                "INSERT INTO teams (name, description, created_at) VALUES (:n, :d, :ts)"
+            ), {"n": name, "d": description, "ts": now_iso()})
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=str(e))
+    return {"ok": True, "name": name}
+
+@router_teams.delete("/teams/{name}")
+def delete_team(name: str):
+    with engine.begin() as conn:
+        conn.execute(text("DELETE FROM teams WHERE name=:n"), {"n": name})
+    return {"ok": True}
+
+@router_teams.post("/tenants/{tenant_id}/teams/{team_name}/enable")
+def enable_team(tenant_id: int, team_name: str, enabled: bool = True):
+    with engine.begin() as conn:
+        team = conn.execute(text("SELECT id FROM teams WHERE name=:n"), {"n": team_name}).first()
+        if not team:
+            raise HTTPException(status_code=404, detail="Team not found")
+        team_id = team[0]
+        row = conn.execute(text(
+            "SELECT id FROM tenant_teams WHERE tenant_id=:t AND team_id=:g"
+        ), {"t": tenant_id, "g": team_id}).first()
+        if row:
+            conn.execute(text(
+                "UPDATE tenant_teams SET enabled=:e WHERE id=:id"
+            ), {"e": 1 if enabled else 0, "id": row[0]})
+        else:
+            conn.execute(text(
+                "INSERT INTO tenant_teams (tenant_id, team_id, enabled, created_at) VALUES (:t,:g,:e,:ts)"
+            ), {"t": tenant_id, "g": team_id, "e": 1 if enabled else 0, "ts": now_iso()})
+    return {"ok": True, "tenant_id": tenant_id, "team": team_name, "enabled": enabled}

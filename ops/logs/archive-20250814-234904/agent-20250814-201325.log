@@ -1,0 +1,11 @@
+20250814-201325 starting sentinel agent
+agent: using API key from process env: sup****************-me
+20250814-201326 starting sentinel agent
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 1): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 2): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 3): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+POST http://127.0.0.1:8001/v0/agents/register failed: No connection could be made because the target machine actively refused it. (127.0.0.1:8001)
+REGISTRATION FAILED (attempt 4): No connection could be made because the target machine actively refused it. (127.0.0.1:8001)

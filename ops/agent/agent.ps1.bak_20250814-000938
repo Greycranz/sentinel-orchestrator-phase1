@@ -1,0 +1,41 @@
+﻿param(
+  [string]$Base = "http://127.0.0.1:8001/v0",
+  [string]$Tenant = "1",
+  [int]$HeartbeatSeconds = 25,
+  [int]$PollSeconds = 2
+)
+$ErrorActionPreference="SilentlyContinue"
+$RepoRoot = Split-Path -Parent (Split-Path -Parent $PSCommandPath)
+$EnvPath  = Join-Path $RepoRoot ".env"
+$EnvKey   = [Environment]::GetEnvironmentVariable("SENTINEL_API_KEY")
+if (-not $EnvKey -or -not $EnvKey.Trim()) {
+  $m=Select-String -Path $EnvPath -Pattern '^\s*SENTINEL_API_KEY\s*=\s*(.+?)\s*$' -ErrorAction SilentlyContinue
+  if ($m) { $EnvKey = $m.Matches[0].Groups[1].Value }
+}
+if (-not $EnvKey -or -not $EnvKey.Trim()) { throw "Missing SENTINEL_API_KEY" }
+$Hdr=@{"X-API-Key"=$EnvKey.Trim()}
+
+$regBody=@{ tenant=$Tenant; name="$($env:COMPUTERNAME)-agent"; platform="windows" }|ConvertTo-Json
+$agentId=(Invoke-RestMethod "$Base/agents/register" -Method POST -Headers $Hdr -ContentType "application/json" -Body $regBody).agent_id
+"agent_id: $agentId"
+
+$nextHb=Get-Date
+while ($true) {
+  $now=Get-Date
+  if ($now -ge $nextHb) {
+    try { Invoke-RestMethod "$Base/agents/heartbeat" -Method POST -Headers $Hdr -ContentType "application/json" -Body (@{ agent_id=$agentId; status="idle"; metrics=@{} }|ConvertTo-Json) | Out-Null } catch {}
+    $nextHb=$now.AddSeconds($HeartbeatSeconds)
+  }
+  try { $claim=Invoke-RestMethod "$Base/agents/jobs?agent_id=$agentId&tenant=$Tenant" -Headers $Hdr -Method GET } catch { Start-Sleep $PollSeconds; continue }
+  $j=$claim.job
+  if ($j -and $j.id) {
+    $status="failed";$out=$null;$err=$null;$logs=@()
+    if ($j.type -eq "echo") { $msg=$j.payload.msg; $status="success"; $out=@{ echoed=$msg }; $logs=@("echoed: $msg") }
+    else { $err="unsupported job type: $($j.type)"; $logs=@("no-op") }
+    try {
+      Invoke-RestMethod "$Base/agents/results" -Method POST -Headers $Hdr -ContentType "application/json" -Body (@{ agent_id=$agentId; job_id=$j.id; status=$status; output=$out; error=$err; logs=$logs }|ConvertTo-Json)|Out-Null
+      "handled job $($j.id): $status"
+    } catch { "submit failed for job $($j.id): $($_.Exception.Message)" }
+  }
+  Start-Sleep $PollSeconds
+}

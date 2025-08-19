@@ -1,0 +1,11 @@
+﻿from pydantic_settings import BaseSettings
+from pydantic import Field
+import os
+
+class Settings(BaseSettings):
+    database_url: str = Field(default="sqlite:///./sentinel.db")
+    worker_poll_interval_seconds: float = Field(default=0.5)
+    # Free mode ON by default (no paid features)
+    free_mode: bool = Field(default=os.environ.get("FREE_MODE", "1") == "1")
+
+settings = Settings()

@@ -1,0 +1,40 @@
+﻿# API Key Management Policy
+rotation:
+  interval_days: 90
+  grace_period_hours: 24
+  
+providers:
+  groq:
+    tier: 1  # free tier
+    validation_endpoint: "https://api.groq.com/openai/v1/models"
+    max_requests_per_day: 1000
+    required_for_finance_approval: false
+    
+  openai:
+    tier: 2  # paid tier
+    validation_endpoint: "https://api.openai.com/v1/models"  
+    max_requests_per_day: 100
+    required_for_finance_approval: true
+    cost_per_1k_tokens: 0.002
+    
+  anthropic:
+    tier: 2  # paid tier
+    validation_endpoint: "https://api.anthropic.com/v1/messages"
+    max_requests_per_day: 100
+    required_for_finance_approval: true
+    cost_per_1k_tokens: 0.008
+
+# Finance gate rules for paid API usage
+finance_rules:
+  enable_paid_tier: false  # default: stick to free/local
+  budget_daily_usd: 10.0
+  budget_monthly_usd: 100.0
+  approval_tokens:
+    - "FIN-APPROVED-DAILY"    # allows one day of paid usage
+    - "FIN-APPROVED-MONTHLY"  # allows one month
+    - "FIN-EMERGENCY"         # overrides all limits
+    
+  escalation_conditions:
+    - high_priority_request: true
+    - free_tier_failed: true
+    - user_willing_to_pay: true

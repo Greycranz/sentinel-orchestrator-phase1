@@ -1,0 +1,23 @@
+﻿from fastapi import FastAPI, Depends
+from sentinel_engine.security import guard_api_key
+from sentinel_engine.routes import agents, jobs, admin, llm
+
+app = FastAPI(title="Sentinel Orchestrator")
+
+@app.get("/healthz")
+def healthz():
+    return {"status": "ok"}
+
+@app.get("/healthz/live")
+def live():
+    return {"status": "ok"}
+
+@app.get("/healthz/ready")
+def ready():
+    return {"status": "ok"}
+
+# Mount routers
+app.include_router(agents.router, prefix="/agents", tags=["agents"], dependencies=[Depends(guard_api_key)])
+app.include_router(jobs.router,   prefix="/jobs",   tags=["jobs"],   dependencies=[Depends(guard_api_key)])
+app.include_router(admin.router,  prefix="/admin",  tags=["admin"])
+app.include_router(llm.router,    prefix="/llm",    tags=["llm"],    dependencies=[Depends(guard_api_key)])

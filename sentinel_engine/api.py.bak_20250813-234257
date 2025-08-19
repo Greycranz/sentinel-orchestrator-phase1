@@ -1,0 +1,77 @@
+﻿from fastapi import FastAPI, Depends
+from sentinel_engine.security import guard_api_key
+from sentinel_engine.routes import agents, jobs, admin, llm
+
+app = FastAPI(title="Sentinel Orchestrator")
+
+@app.get("/healthz")
+def healthz():
+    return {"status": "ok"}
+
+@app.get("/healthz/live")
+def live():
+    return {"status": "ok"}
+
+@app.get("/healthz/ready")
+def ready():
+    return {"status": "ok"}
+
+# Mount routers
+app.include_router(agents.router, prefix="/agents", tags=["agents"], dependencies=[Depends(guard_api_key)])
+app.include_router(jobs.router,   prefix="/jobs",   tags=["jobs"],   dependencies=[Depends(guard_api_key)])
+app.include_router(admin.router,  prefix="/admin",  tags=["admin"])
+app.include_router(llm.router,    prefix="/llm",    tags=["llm"],    dependencies=[Depends(guard_api_key)])
+
+from fastapi import Request, Response
+import time
+
+# --- Metrics globals ---
+metrics_data = {
+    "requests_total": 0,
+    "requests_by_path": {},
+    "errors_total": 0,
+    "start_time": time.time()
+}
+
+@app.middleware("http")
+async def metrics_and_auth_middleware(request: Request, call_next):
+    # Skip auth for health + metrics
+    open_paths = ("/healthz", "/healthz/live", "/healthz/ready", "/metrics")
+    path = request.url.path
+
+    # Auth guard for non-open paths
+    if not any(path.startswith(p) for p in open_paths):
+        from .security import verify_api_key
+        await verify_api_key(request)  # raises HTTPException if invalid
+
+    # Metrics tracking
+    metrics_data["requests_total"] += 1
+    metrics_data["requests_by_path"].setdefault(path, 0)
+    metrics_data["requests_by_path"][path] += 1
+
+    try:
+        response = await call_next(request)
+        return response
+    except Exception:
+        metrics_data["errors_total"] += 1
+        raise
+
+@app.get("/metrics")
+def metrics():
+    """Basic Prometheus-style metrics"""
+    uptime = time.time() - metrics_data["start_time"]
+    lines = [
+        f"# HELP sentinel_requests_total Total HTTP requests",
+        f"# TYPE sentinel_requests_total counter",
+        f"sentinel_requests_total {metrics_data['requests_total']}",
+        f"# HELP sentinel_errors_total Total HTTP request errors",
+        f"# TYPE sentinel_errors_total counter",
+        f"sentinel_errors_total {metrics_data['errors_total']}",
+        f"# HELP sentinel_uptime_seconds Service uptime in seconds",
+        f"# TYPE sentinel_uptime_seconds gauge",
+        f"sentinel_uptime_seconds {uptime}"
+    ]
+    for path, count in metrics_data["requests_by_path"].items():
+        safe_path = path.replace("/", "_").strip("_")
+        lines.append(f'sentinel_requests_path_total{{path="{path}"}} {count}')
+    return Response("\n".join(lines), media_type="text/plain")

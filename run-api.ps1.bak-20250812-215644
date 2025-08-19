@@ -1,0 +1,41 @@
+param(
+  [int]$Port = 8001,
+  [string]$BindHost = "127.0.0.1",
+  [ValidateSet("info","warning","error","debug","critical")][string]$LogLevel = "info"
+)
+$ErrorActionPreference = "Stop"
+
+$VenvPy  = Join-Path $PSScriptRoot ".venv\Scripts\python.exe"
+$EnvFile = Join-Path $PSScriptRoot ".env"
+$LogsDir = Join-Path $PSScriptRoot "ops\logs"
+New-Item -ItemType Directory -Force -Path $LogsDir | Out-Null
+
+# Load API key from .env if present
+if (Test-Path $EnvFile) {
+  $kv = Get-Content $EnvFile | Where-Object {$_ -match "="} | ForEach-Object {
+    $parts = $_ -split "=",2; [pscustomobject]@{ Key=$parts[0]; Val=$parts[1] }
+  }
+  foreach ($p in $kv) { if ($p.Key -eq "SENTINEL_API_KEY") { $env:SENTINEL_API_KEY = $p.Val } }
+}
+
+# Ensure package discovery
+$env:PYTHONPATH = $PSScriptRoot
+
+# Daily-rotated log
+$log = Join-Path $LogsDir ("api-" + (Get-Date -Format 'yyyyMMdd') + ".log")
+"[$(Get-Date -Format o)] starting run-api.ps1 (bind_host=$BindHost port=$Port level=$LogLevel)" | Out-File -FilePath $log -Append -Encoding utf8
+
+# If the port is already used, log and retry later
+function Test-PortFree {
+  try {
+    $listener = [System.Net.Sockets.TcpListener]::new([Net.IPAddress]::Parse($BindHost), $Port)
+    $listener.Start(); $listener.Stop(); return $true
+  } catch { return $false }
+}
+while (-not (Test-PortFree)) {
+  "[$(Get-Date -Format o)] port $($BindHost):$Port in use; retry in 10s" | Out-File -FilePath $log -Append -Encoding utf8
+  Start-Sleep 10
+}
+
+# Launch uvicorn; pipe output into the log
+& $VenvPy -m uvicorn sentinel_engine.api:app --host $BindHost --port $Port --log-level $LogLevel 2>&1 | Tee-Object -FilePath $log -Append

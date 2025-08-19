@@ -1,0 +1,195 @@
+﻿from fastapi import APIRouter, HTTPException, Response, Request, Depends
+from .db import create_task, get_task, list_tasks, update_task_status, create_tenant, list_tenants, get_tenant, create_api_key, list_api_keys, list_tenant_teams
+from fastapi.responses import HTMLResponse, JSONResponse
+from typing import List
+from datetime import datetime
+import json, os, secrets
+
+from .models import TaskIn, TaskOut, TenantIn, TenantOut
+
+from .task_queue import notify_new_task
+from .integrator import deploy, rollback
+from .metrics import tasks_created, tasks_deployed, render_prometheus
+from .auth import verify_basic_auth
+from .teams_api import router_teams
+
+router = APIRouter()
+
+# ---- merge in Teams CRUD ----
+router.include_router(router_teams)
+
+# ---- Tool registry endpoints (so Upgrader can adopt new tools) ----
+@router.get("/tools/registry")
+def get_tool_registry():
+    path = os.path.join(os.path.dirname(__file__), "tool_registry.json")
+    if not os.path.exists(path):
+        return JSONResponse({"tools": [], "policy": {"accept_only_free": True, "sandbox_required": True}})
+    with open(path, "r", encoding="utf-8") as f:
+        return JSONResponse(json.load(f))
+
+@router.post("/tools/registry")
+def update_tool_registry(payload: dict):
+    path = os.path.join(os.path.dirname(__file__), "tool_registry.json")
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(payload, f, indent=2)
+    return {"ok": True}
+
+def row_to_taskout(row) -> TaskOut:
+    data = None
+    if row.get("data"):
+        try:
+            data = json.loads(row["data"])
+        except Exception:
+            data = None
+    return TaskOut(
+        id=row["id"],
+        title=row["title"],
+        description=row["description"],
+        priority=row["priority"],
+        requester=row["requester"],
+        status=row["status"],
+        created_at=datetime.fromisoformat(row["created_at"]),
+        updated_at=datetime.fromisoformat(row["updated_at"]),
+        tenant_id=row.get("tenant_id"),
+        data=data,
+    )
+
+def row_to_tenantout(row) -> TenantOut:
+    return TenantOut(
+        id=row["id"],
+        name=row["name"],
+        plan=row["plan"],
+        safety_mode=row["safety_mode"],
+        created_at=datetime.fromisoformat(row["created_at"]),
+    )
+
+@router.get("/health")
+def health():
+    return {"ok": True}
+
+@router.post("/tenants", response_model=TenantOut)
+async def create_tenant_endpoint(tenant: TenantIn):
+    tid = create_tenant(tenant.name, tenant.plan, tenant.safety_mode)
+    row = get_tenant(tid)
+    return row_to_tenantout(row)
+
+@router.get("/tenants", response_model=List[TenantOut])
+async def list_tenants_endpoint(limit: int = 200):
+    rows = list_tenants(limit=limit)
+    return [row_to_tenantout(r) for r in rows]
+
+@router.post("/tenants/{tenant_id}/apikeys")
+async def create_apikey_endpoint(tenant_id: int, name: str = "default"):
+    key = secrets.token_urlsafe(32)
+    create_api_key(tenant_id, name, key)
+    return {"tenant_id": tenant_id, "name": name, "api_key": key}
+
+@router.get("/tenants/{tenant_id}/apikeys")
+async def list_apikeys_endpoint(tenant_id: int):
+    return list_api_keys(tenant_id)
+
+@router.post("/tasks", response_model=TaskOut)
+async def create_task_endpoint(task: TaskIn):
+    task_id = create_task(task.title, task.description, task.priority, task.requester, task.data, task.tenant_id)
+    tasks_created.inc()
+    await notify_new_task(task_id)
+    row = get_task(task_id)
+    return row_to_taskout(row)
+
+@router.get("/tasks", response_model=List[TaskOut])
+async def list_tasks_endpoint(limit: int = 100):
+    rows = list_tasks(limit=limit)
+    return [row_to_taskout(r) for r in rows]
+
+@router.get("/tasks/{task_id}", response_model=TaskOut)
+async def get_task_endpoint(task_id: int):
+    row = get_task(task_id)
+    if not row:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return row_to_taskout(row)
+
+@router.post("/tasks/{task_id}/approve", response_model=TaskOut)
+async def approve_task_endpoint(task_id: int):
+    row = get_task(task_id)
+    if not row:
+        raise HTTPException(status_code=404, detail="Task not found")
+    if row["status"] != "awaiting_approval":
+        raise HTTPException(status_code=400, detail="Task not ready for approval")
+    data = json.loads(row["data"]) if row.get("data") else {}
+    deploy_log = deploy(task_id, data.get("artifact", {}))
+    data["deploy"] = deploy_log
+    update_task_status(task_id, "deployed", data_update=data)
+    tasks_deployed.inc()
+    row = get_task(task_id)
+    return row_to_taskout(row)
+
+@router.post("/tasks/{task_id}/rollback")
+async def rollback_task_endpoint(task_id: int, reason: str = "manual rollback"):
+    row = get_task(task_id)
+    if not row:
+        raise HTTPException(status_code=404, detail="Task not found")
+    data = json.loads(row["data"]) if row.get("data") else {}
+    data["rollback"] = rollback(task_id, reason)
+    update_task_status(task_id, "rolled_back", data_update=data)
+    return {"ok": True, "task_id": task_id, "reason": reason}
+
+@router.get("/ui/approvals", response_class=HTMLResponse)
+async def approvals_ui(request: Request):
+    import os
+    pw = os.environ.get("UI_ADMIN_PASSWORD")
+    from .auth import set_ui_password
+
+    if pw and (getattr(set_ui_password, "_initialized", False) is False):
+        set_ui_password(pw)
+        setattr(set_ui_password, "_initialized", True)
+    if pw:
+        verify_basic_auth(request)
+
+    rows = list_tasks(limit=200)
+    awaiting = [r for r in rows if r["status"] == "awaiting_approval"]
+    items = ""
+    for r in awaiting:
+        t = r.get("tenant_id") or "-"
+        items += f"""
+        <li>
+            <strong>#{r['id']}</strong> [tenant: {t}] â€“ {r['title']}
+            <form method="post" action="/tasks/{r['id']}/approve" style="display:inline;">
+                <button type="submit">Approve</button>
+            </form>
+            <form method="post" action="/tasks/{r['id']}/rollback" style="display:inline;margin-left:8px;">
+                <button type="submit">Rollback</button>
+            </form>
+        </li>
+        """
+    html = f"""
+    <html>
+      <head><title>Sentinel Approvals</title></head>
+      <body>
+        <h1>Awaiting Approval</h1>
+        <ul>{items or "<li>No items pending.</li>"}</ul>
+      </body>
+    </html>
+    """
+    return HTMLResponse(content=html, status_code=200)
+
+
+@router.get("/tenants/{tenant_id}")
+def read_tenant(tenant_id: int):
+    t = get_tenant(tenant_id)
+    if not t:
+        raise HTTPException(status_code=404, detail="Tenant not found")
+    return t
+
+
+@router.get("/tenants/{tenant_id}/teams")
+def read_tenant_teams(tenant_id: int):
+    t = get_tenant(tenant_id)
+    if not t:
+        raise HTTPException(status_code=404, detail="Tenant not found")
+    teams = list_tenant_teams(tenant_id)
+    return {"tenant_id": tenant_id, "teams": teams}
+
+
+
+
+

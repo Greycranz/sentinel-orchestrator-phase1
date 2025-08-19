@@ -1,0 +1,43 @@
+INFO:     127.0.0.1:51356 - "GET /healthz HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51356 - "GET /healthz-plus HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51356 - "POST /admin/rollback HTTP/1.1" 422 Unprocessable Content
+INFO:     127.0.0.1:51363 - "POST /admin/rollback HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51363 - "POST /admin/rollback HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51364 - "GET /healthz HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51364 - "GET /healthz-plus HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51384 - "POST /admin/rollback HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51384 - "POST /admin/rollback HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51384 - "GET /healthz HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51384 - "GET /healthz-plus HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51410 - "POST /admin/rollback HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51410 - "POST /admin/rollback HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51410 - "GET /healthz HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51410 - "GET /healthz-plus HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51440 - "POST /tenants HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:51440 - "POST /teams HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:51440 - "POST /admin/api-keys HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:51441 - "GET /docs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51440 - "GET /tenants HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:51440 - "GET /teams?tenant_id= HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:51440 - "GET /admin/api-keys?tenant_id= HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:51441 - "GET /redoc HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51441 - "GET /openapi.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51441 - "GET /openapi.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51495 - "GET /openapi.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51503 - "GET /openapi.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51505 - "GET /docs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51505 - "GET /redoc HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51505 - "GET /openapi.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51505 - "GET /openapi.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51568 - "GET /openapi.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51577 - "GET /docs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51577 - "GET /redoc HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51577 - "GET /openapi.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51577 - "GET /openapi.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51586 - "GET /openapi.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51578 - "GET /docs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51578 - "GET /redoc HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51578 - "GET /openapi.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51578 - "GET /openapi.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51588 - "GET /docs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51588 - "GET /openapi.json HTTP/1.1" 200 OK

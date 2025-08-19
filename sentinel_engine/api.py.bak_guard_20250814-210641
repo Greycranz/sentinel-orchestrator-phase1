@@ -1,0 +1,777 @@
+﻿# ---- compatibility shim: metrics singleton ----
+try:
+    METRICS
+except NameError:
+    class _MetricsShim:
+        def __init__(self):
+            self.total = 0
+            self.errors = 0
+        def inc_total(self):
+            self.total += 1
+        def inc_errors(self):
+            self.errors += 1
+        def snapshot(self):
+            return {"total": self.total, "errors": self.errors}
+    METRICS = _MetricsShim()
+
+# ensure legacy name also points to the singleton
+try:
+    metrics
+except NameError:
+    metrics = METRICS
+# ---- end shim ----
+from fastapi import status
+AUTH_OPEN_PATHS = {"/healthz","/healthz/live","/healthz/ready"}
+from fastapi import Request, HTTPException
+AUTH_OPEN_PATHS = {"/healthz","/healthz/live","/healthz/ready"}
+from fastapi import FastAPI, Depends
+from sentinel_engine.routes.jobs_claim_mvp import router as jobs_router
+AUTH_OPEN_PATHS = {"/healthz","/healthz/live","/healthz/ready"}
+from sentinel_engine.security import guard_api_key
+from sentinel_engine.routes import agents, jobs, admin, llm, orchestrator_agent_mvp
+from . import version
+from . import metrics
+
+@app.middleware("http")
+async def metrics_middleware(request: Request, call_next):
+    # count every request and status outcome without changing auth behavior
+    METRICS.inc_total()
+    try:
+        response = await call_next(request)
+        try:
+            METRICS.inc_status(response.status_code)
+        except Exception:
+            pass
+        return response
+    except HTTPException as e:
+        try:
+            METRICS.inc_status(e.status_code)
+        except Exception:
+            pass
+        raise
+    except Exception:
+        try:
+            METRICS.inc_status(500)
+        except Exception:
+            pass
+        raise
+@app.get("/healthz")
+def healthz():
+    return {"status": "ok"}
+
+@app.get("/healthz/live")
+def live():
+    return {"status": "ok"}
+
+@app.get("/healthz/ready")
+def ready():
+    return {"status": "ok"}
+
+# Mount routers
+app.include_router(agents.router, prefix="/agents", tags=["agents"], dependencies=[Depends(guard_api_key)])
+app.include_router(jobs.router,   prefix="/jobs",   tags=["jobs"],   dependencies=[Depends(guard_api_key)])
+app.include_router(admin.router,  prefix="/admin",  tags=["admin"])
+app.include_router(llm.router,    prefix="/llm",    tags=["llm"],    dependencies=[Depends(guard_api_key)])
+import time
+
+# --- Metrics globals ---
+metrics_data = {
+    "requests_total": 0,
+    "requests_by_path": {},
+    "errors_total": 0,
+    "start_time": time.time()
+}
+
+@app.middleware("http")
+async def _old_metrics_and_auth_middleware(request: Request, call_next):
+    # Skip auth for health + metrics
+    open_paths = ("/healthz", "/healthz/live", "/healthz/ready", "/metrics")
+    path = request.url.path
+
+    # Auth guard for non-open paths
+    if not any(path.startswith(p) for p in open_paths):
+        from .security import verify_api_key
+        await verify_api_key(request)  # raises HTTPException if invalid
+
+    # Metrics tracking
+    metrics_data["requests_total"] += 1
+    metrics_data["requests_by_path"].setdefault(path, 0)
+    metrics_data["requests_by_path"][path] += 1
+
+    try:
+        response = await call_next(request)
+        return response
+    except Exception:
+        metrics_data["errors_total"] += 1
+        raise
+
+@app.get("/metrics")
+def metrics_view():
+    """Basic Prometheus-style metrics"""
+    uptime = time.time() - metrics_data["start_time"]
+    lines = [
+        f"# HELP sentinel_requests_total Total HTTP requests",
+        f"# TYPE sentinel_requests_total counter",
+        f"sentinel_requests_total {metrics_data['requests_total']}",
+        f"# HELP sentinel_errors_total Total HTTP request errors",
+        f"# TYPE sentinel_errors_total counter",
+        f"sentinel_errors_total {metrics_data['errors_total']}",
+        f"# HELP sentinel_uptime_seconds Service uptime in seconds",
+        f"# TYPE sentinel_uptime_seconds gauge",
+        f"sentinel_uptime_seconds {uptime}"
+    ]
+    for path, count in metrics_data["requests_by_path"].items():
+        safe_path = path.replace("/", "_").strip("_")
+        lines.append(f'sentinel_requests_path_total{{path="{path}"}} {count}')
+    return Response("\n".join(lines), media_type="text/plain")
+
+# ---------------- Teams minimal storage & endpoints (file-backed) ----------------
+from fastapi import HTTPException
+AUTH_OPEN_PATHS = {"/healthz","/healthz/live","/healthz/ready"}
+from typing import Dict, Any, List
+import json, os, threading, time
+
+_TEAMS_DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "ops", "data")
+_TEAMS_DATA_PATH = os.path.join(_TEAMS_DATA_DIR, "teams.json")
+_AUDIT_LOG_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "ops", "logs")
+_AUDIT_LOG_PATH = os.path.join(_AUDIT_LOG_DIR, "audit.jsonl")
+_os_init_once = threading.Lock()
+
+def _ensure_paths():
+    with _os_init_once:
+        os.makedirs(_TEAMS_DATA_DIR, exist_ok=True)
+        os.makedirs(_AUDIT_LOG_DIR, exist_ok=True)
+        if not os.path.exists(_TEAMS_DATA_PATH):
+            with open(_TEAMS_DATA_PATH, "w", encoding="utf-8") as f:
+                json.dump({}, f)
+
+def _load_teams() -> Dict[str, Dict[str, Dict[str, Any]]]:
+    _ensure_paths()
+    try:
+        with open(_TEAMS_DATA_PATH, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            if not isinstance(data, dict):
+                return {}
+            return data
+    except Exception:
+        return {}
+
+def _save_teams(data: Dict[str, Dict[str, Dict[str, Any]]]) -> None:
+    _ensure_paths()
+    tmp = _TEAMS_DATA_PATH + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
+    os.replace(tmp, _TEAMS_DATA_PATH)
+
+def _audit(event: str, payload: Dict[str, Any]) -> None:
+    _ensure_paths()
+    rec = {
+        "ts": time.time(),
+        "event": event,
+        **payload
+    }
+    with open(_AUDIT_LOG_PATH, "a", encoding="utf-8") as f:
+        f.write(json.dumps(rec) + "\n")
+
+@app.get("/tenants/{tenant}/teams")
+async def list_teams(tenant: str):
+    """
+    List teams for a tenant.
+    """
+    data = _load_teams()
+    tenant_obj = data.get(tenant, {})
+    # return as array
+    result = [{"team": k, **v} for k, v in tenant_obj.items()]
+    return {"tenant": tenant, "teams": result}
+
+@app.post("/tenants/{tenant}/teams/{team}/enable")
+async def enable_team(tenant: str, team: str, enabled: bool = True):
+    """
+    Upsert team enabled state for a tenant.
+    """
+    data = _load_teams()
+    if tenant not in data:
+        data[tenant] = {}
+    team_obj = data[tenant].get(team, {})
+    team_obj["enabled"] = bool(enabled)
+    team_obj.setdefault("created_at", time.time())
+    team_obj["updated_at"] = time.time()
+    data[tenant][team] = team_obj
+    _save_teams(data)
+
+    _audit("team_enable", {"tenant": tenant, "team": team, "enabled": bool(enabled)})
+
+    return {"tenant": tenant, "team": team, "enabled": bool(enabled)}
+# ---------------- end Teams endpoints ----------------
+
+# ---------------- Agents + Jobs minimal storage & endpoints (file-backed) ----------------
+from pydantic import BaseModel, Field
+from uuid import uuid4
+from typing import Optional
+
+_AGENTS_DATA_DIR = _TEAMS_DATA_DIR  # reuse ops/data
+_AGENTS_DATA_PATH = os.path.join(_AGENTS_DATA_DIR, "agents.json")
+_JOBS_DATA_PATH   = os.path.join(_AGENTS_DATA_DIR, "jobs.json")
+_jobs_lock = threading.Lock()
+_agents_lock = threading.Lock()
+
+def _ensure_agents_jobs():
+    _ensure_paths()
+    os.makedirs(_AGENTS_DATA_DIR, exist_ok=True)
+    if not os.path.exists(_AGENTS_DATA_PATH):
+        with open(_AGENTS_DATA_PATH, "w", encoding="utf-8") as f:
+            json.dump({}, f)
+    if not os.path.exists(_JOBS_DATA_PATH):
+        with open(_JOBS_DATA_PATH, "w", encoding="utf-8") as f:
+            json.dump({"queue": [], "done": []}, f)
+
+def _load_agents() -> Dict[str, Dict[str, Any]]:
+    _ensure_agents_jobs()
+    try:
+        with open(_AGENTS_DATA_PATH, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            return data if isinstance(data, dict) else {}
+    except Exception:
+        return {}
+
+def _save_agents(data: Dict[str, Dict[str, Any]]) -> None:
+    _ensure_agents_jobs()
+    tmp = _AGENTS_DATA_PATH + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
+    os.replace(tmp, _AGENTS_DATA_PATH)
+
+def _load_jobs() -> Dict[str, Any]:
+    _ensure_agents_jobs()
+    try:
+        with open(_JOBS_DATA_PATH, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            if not isinstance(data, dict):
+                return {"queue": [], "done": []}
+            data.setdefault("queue", []); data.setdefault("done", [])
+            return data
+    except Exception:
+        return {"queue": [], "done": []}
+
+def _save_jobs(data: Dict[str, Any]) -> None:
+    _ensure_agents_jobs()
+    tmp = _JOBS_DATA_PATH + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
+    os.replace(tmp, _JOBS_DATA_PATH)
+
+# ----- models -----
+class AgentRegisterRequest(BaseModel):
+    tenant: str
+    name: str
+    version: Optional[str] = None
+    platform: Optional[str] = None
+    capabilities: Optional[list[str]] = None
+    metadata: Optional[Dict[str, Any]] = None
+
+class AgentRegisterResponse(BaseModel):
+    agent_id: str
+    heartbeat_interval: int = 30
+
+class AgentHeartbeatRequest(BaseModel):
+    agent_id: str
+    status: Optional[str] = "idle"
+    metrics: Optional[Dict[str, Any]] = None
+
+class JobEnqueueRequest(BaseModel):
+    type: str
+    payload: Dict[str, Any] = Field(default_factory=dict)
+    priority: int = 0
+    # optional: restrict to capability or agent tags later
+    requires: Optional[list[str]] = None
+
+class JobClaimQuery(BaseModel):
+    agent_id: str
+    tenant: Optional[str] = None
+
+class JobResultRequest(BaseModel):
+    agent_id: str
+    job_id: str
+    status: str  # "success" | "failed"
+    output: Optional[Dict[str, Any]] = None
+    error: Optional[str] = None
+    logs: Optional[list[str]] = None
+
+# ----- endpoints -----
+@app.post("/agents/register", response_model=AgentRegisterResponse)
+async def register_agent(req: AgentRegisterRequest):
+    _ensure_agents_jobs()
+    with _agents_lock:
+        agents = _load_agents()
+        agent_id = str(uuid4())
+        now = time.time()
+        agents[agent_id] = {
+            "tenant": req.tenant,
+            "name": req.name,
+            "version": req.version,
+            "platform": req.platform,
+            "capabilities": req.capabilities or [],
+            "metadata": req.metadata or {},
+            "created_at": now,
+            "last_seen": now,
+            "status": "registered"
+        }
+        _save_agents(agents)
+    _audit("agent_register", {"agent_id": agent_id, "tenant": req.tenant, "name": req.name})
+    return AgentRegisterResponse(agent_id=agent_id)
+
+@app.post("/agents/heartbeat")
+async def agent_heartbeat(req: AgentHeartbeatRequest):
+    _ensure_agents_jobs()
+    with _agents_lock:
+        agents = _load_agents()
+        info = agents.get(req.agent_id)
+        if not info:
+            raise HTTPException(status_code=404, detail="Unknown agent_id")
+        info["last_seen"] = time.time()
+        if req.status:
+            info["status"] = req.status
+        if req.metrics:
+            info["metrics"] = req.metrics
+        _save_agents(agents)
+    _audit("agent_heartbeat", {"agent_id": req.agent_id, "status": info.get("status")})
+    return {"ok": True, "next_heartbeat_in": 30}
+
+@app.get("/agents/jobs")
+async def claim_job(agent_id: str, tenant: Optional[str] = None):
+    """
+    Agent claims one available job (FIFO). Optionally filtered by tenant.
+    """
+    _ensure_agents_jobs()
+    with _jobs_lock:
+        jobs = _load_jobs()
+        queue = jobs.get("queue", [])
+        idx = None
+        for i, j in enumerate(queue):
+            if j.get("status") == "queued" and (tenant is None or j.get("tenant") == tenant):
+                idx = i; break
+        if idx is None:
+            return {"job": None}
+        job = queue.pop(idx)
+        job["status"] = "claimed"
+        job["claimed_by"] = agent_id
+        job["claimed_at"] = time.time()
+        jobs["queue"] = queue
+        jobs["done"] = jobs.get("done", [])
+        jobs["queue"].insert(0, job)  # keep claimed visible at head
+        _save_jobs(jobs)
+    _audit("job_claim", {"job_id": job["id"], "agent_id": agent_id})
+    return {"job": job}
+
+@app.post("/agents/results")
+async def submit_job_result(req: JobResultRequest):
+    _ensure_agents_jobs()
+    if req.status not in ("success", "failed"):
+        raise HTTPException(status_code=400, detail="Invalid status")
+    with _jobs_lock:
+        jobs = _load_jobs()
+        # find in queue first
+        found = None
+        for j in jobs.get("queue", []):
+            if j.get("id") == req.job_id:
+                found = j; break
+        # fallback: maybe already moved
+        if not found:
+            for j in jobs.get("done", []):
+                if j.get("id") == req.job_id:
+                    found = j; break
+        if not found:
+            raise HTTPException(status_code=404, detail="Unknown job_id")
+        found["status"] = req.status
+        found["completed_at"] = time.time()
+        if req.output is not None: found["output"] = req.output
+        if req.error is not None:  found["error"] = req.error
+        if req.logs is not None:   found["logs"] = req.logs
+        # move to done list if not already there
+        q = jobs.get("queue", [])
+        if found in q:
+            q.remove(found)
+            jobs.setdefault("done", []).append(found)
+        _save_jobs(jobs)
+    _audit("job_result", {"job_id": req.job_id, "agent_id": req.agent_id, "status": req.status})
+    return {"ok": True}
+
+# ----- helper to enqueue jobs for testing/ops -----
+@app.post("/tenants/{tenant}/jobs/enqueue")
+async def enqueue_job(tenant: str, req: JobEnqueueRequest):
+    """
+    Enqueue a job for a tenant. Minimal fields: type, payload.
+    """
+    _ensure_agents_jobs()
+    job = {
+        "id": str(uuid4()),
+        "tenant": tenant,
+        "type": req.type,
+        "payload": req.payload or {},
+        "priority": int(req.priority or 0),
+        "requires": req.requires or [],
+        "status": "queued",
+        "created_at": time.time()
+    }
+    with _jobs_lock:
+        jobs = _load_jobs()
+        jobs.setdefault("queue", []).append(job)
+        _save_jobs(jobs)
+    _audit("job_enqueue", {"job_id": job["id"], "tenant": tenant, "type": req.type})
+    return {"job_id": job["id"]}
+# ---------------- end Agents + Jobs ----------------
+
+# ---------------- /v0 Agents + Jobs (file-backed, conflict-free) ----------------
+from fastapi import APIRouter
+AUTH_OPEN_PATHS = {"/healthz","/healthz/live","/healthz/ready"}
+_v0 = APIRouter()
+
+class V0AgentRegisterRequest(AgentRegisterRequest): pass
+class V0AgentRegisterResponse(AgentRegisterResponse): pass
+class V0AgentHeartbeatRequest(AgentHeartbeatRequest): pass
+class V0JobEnqueueRequest(JobEnqueueRequest): pass
+class V0JobResultRequest(JobResultRequest): pass
+
+@_v0.post("/agents/register", response_model=V0AgentRegisterResponse)
+async def v0_register_agent(req: V0AgentRegisterRequest):
+    # same as /agents/register, but namespaced to avoid legacy conflicts
+    _ensure_agents_jobs()
+    with _agents_lock:
+        agents = _load_agents()
+        agent_id = str(uuid4())
+        now = time.time()
+        agents[agent_id] = {
+            "tenant": req.tenant,
+            "name": req.name,
+            "version": req.version or "",
+            "platform": req.platform or "",
+            "capabilities": req.capabilities or [],
+            "metadata": req.metadata or {},
+            "created_at": now,
+            "last_seen": now,
+            "status": "registered"
+        }
+        _save_agents(agents)
+    _audit("agent_register", {"agent_id": agent_id, "tenant": req.tenant, "name": req.name})
+    return V0AgentRegisterResponse(agent_id=agent_id)
+
+@_v0.post("/agents/heartbeat")
+async def v0_agent_heartbeat(req: V0AgentHeartbeatRequest):
+    _ensure_agents_jobs()
+    with _agents_lock:
+        agents = _load_agents()
+        info = agents.get(req.agent_id)
+        if not info:
+            raise HTTPException(status_code=404, detail="Unknown agent_id")
+        info["last_seen"] = time.time()
+        if req.status:  info["status"] = req.status
+        if req.metrics: info["metrics"] = req.metrics
+        _save_agents(agents)
+    _audit("agent_heartbeat", {"agent_id": req.agent_id, "status": info.get("status")})
+    return {"ok": True, "next_heartbeat_in": 30}
+
+@_v0.get("/agents/jobs")
+async def v0_claim_job(agent_id: str, tenant: Optional[str] = None):
+    _ensure_agents_jobs()
+    with _jobs_lock:
+        jobs = _load_jobs()
+        queue = jobs.get("queue", [])
+        idx = None
+        for i, j in enumerate(queue):
+            if j.get("status") == "queued" and (tenant is None or j.get("tenant") == tenant):
+                idx = i; break
+        if idx is None:
+            return {"job": None}
+        job = queue.pop(idx)
+        job["status"] = "claimed"
+        job["claimed_by"] = agent_id
+        job["claimed_at"] = time.time()
+        jobs["queue"] = queue
+        jobs.setdefault("done", [])
+        # keep claimed visible at head to aid debugging
+        jobs["queue"].insert(0, job)
+        _save_jobs(jobs)
+    _audit("job_claim", {"job_id": job["id"], "agent_id": agent_id})
+    return {"job": job}
+
+@_v0.post("/agents/results")
+async def v0_submit_job_result(req: V0JobResultRequest):
+    _ensure_agents_jobs()
+    if req.status not in ("success", "failed"):
+        raise HTTPException(status_code=400, detail="Invalid status")
+    with _jobs_lock:
+        jobs = _load_jobs()
+        found = None
+        for j in jobs.get("queue", []):
+            if j.get("id") == req.job_id:
+                found = j; break
+        if not found:
+            for j in jobs.get("done", []):
+                if j.get("id") == req.job_id:
+                    found = j; break
+        if not found:
+            raise HTTPException(status_code=404, detail="Unknown job_id")
+        found["status"] = req.status
+        found["completed_at"] = time.time()
+        if req.output is not None: found["output"] = req.output
+        if req.error is not None:  found["error"] = req.error
+        if req.logs is not None:   found["logs"] = req.logs
+        q = jobs.get("queue", [])
+        if found in q:
+            q.remove(found)
+            jobs.setdefault("done", []).append(found)
+        _save_jobs(jobs)
+    _audit("job_result", {"job_id": req.job_id, "agent_id": req.agent_id, "status": req.status})
+    return {"ok": True}
+
+@_v0.post("/tenants/{tenant}/jobs/enqueue")
+async def v0_enqueue_job(tenant: str, req: V0JobEnqueueRequest):
+    _ensure_agents_jobs()
+    job = {
+        "id": str(uuid4()),
+        "tenant": tenant,
+        "type": req.type,
+        "payload": req.payload or {},
+        "priority": int(req.priority or 0),
+        "requires": req.requires or [],
+        "status": "queued",
+        "created_at": time.time()
+    }
+    with _jobs_lock:
+        jobs = _load_jobs()
+        jobs.setdefault("queue", []).append(job)
+        _save_jobs(jobs)
+    _audit("job_enqueue", {"job_id": job["id"], "tenant": tenant, "type": req.type})
+    return {"job_id": job["id"]}
+
+# Mount the v0 router
+app.include_router(_v0, prefix="/v0")
+# ---------------- end /v0 ----------------
+# ---- metrics enrichment (jobs & agents) ----
+def _metrics_snapshot():
+    # Safe wrappers; storage helpers already ensure paths
+    try:
+        jobs = _load_jobs()
+    except Exception:
+        jobs = {"queue": [], "done": []}
+    try:
+        agents = _load_agents()
+    except Exception:
+        agents = {}
+
+    q = jobs.get("queue", [])
+    d = jobs.get("done", [])
+    now = time.time()
+
+    # queue age: seconds since oldest queued job
+    oldest_q = None
+    for j in q:
+        if j.get("status") == "queued":
+            ts = j.get("created_at") or now
+            oldest_q = ts if oldest_q is None else min(oldest_q, ts)
+    queue_oldest_age = (now - oldest_q) if oldest_q else 0
+
+    # agent staleness: seconds since most recent heartbeat
+    latest_seen = None
+    for a in agents.values():
+        ts = a.get("last_seen")
+        if ts:
+            latest_seen = ts if latest_seen is None else max(latest_seen, ts)
+    agents_most_recent_seen_age = (now - latest_seen) if latest_seen else 0
+
+    return {
+        "queue_total": len([j for j in q if j.get("status") == "queued"]),
+        "queue_claimed": len([j for j in q if j.get("status") == "claimed"]),
+        "done_total": len(d),
+        "agents_total": len(agents),
+        "queue_oldest_age": queue_oldest_age,
+        "agents_most_recent_seen_age": agents_most_recent_seen_age,
+    }
+
+# Extend existing /metrics handler
+@app.get("/metrics")
+def metrics_view():
+    """Basic Prometheus-style metrics"""
+    uptime = time.time() - metrics_data["start_time"]
+    extra = _metrics_snapshot()
+    lines = [
+        f"# HELP sentinel_requests_total Total HTTP requests",
+        f"# TYPE sentinel_requests_total counter",
+        f"sentinel_requests_total {metrics_data['requests_total']}",
+        f"# HELP sentinel_errors_total Total HTTP request errors",
+        f"# TYPE sentinel_errors_total counter",
+        f"sentinel_errors_total {metrics_data['errors_total']}",
+        f"# HELP sentinel_uptime_seconds Service uptime in seconds",
+        f"# TYPE sentinel_uptime_seconds gauge",
+        f"sentinel_uptime_seconds {uptime}",
+        f"# HELP sentinel_agents_total Registered agents",
+        f"# TYPE sentinel_agents_total gauge",
+        f"sentinel_agents_total {extra['agents_total']}",
+        f"# HELP sentinel_jobs_queue_total Queued jobs",
+        f"# TYPE sentinel_jobs_queue_total gauge",
+        f"sentinel_jobs_queue_total {extra['queue_total']}",
+        f"# HELP sentinel_jobs_claimed_total Claimed but not finished jobs",
+        f"# TYPE sentinel_jobs_claimed_total gauge",
+        f"sentinel_jobs_claimed_total {extra['queue_claimed']}",
+        f"# HELP sentinel_jobs_done_total Completed jobs",
+        f"# TYPE sentinel_jobs_done_total counter",
+        f"sentinel_jobs_done_total {extra['done_total']}",
+        f"# HELP sentinel_jobs_queue_oldest_age_seconds Oldest queued job age",
+        f"# TYPE sentinel_jobs_queue_oldest_age_seconds gauge",
+        f"sentinel_jobs_queue_oldest_age_seconds {extra['queue_oldest_age']}",
+        f"# HELP sentinel_agents_most_recent_seen_age_seconds Most recent heartbeat age",
+        f"# TYPE sentinel_agents_most_recent_seen_age_seconds gauge",
+        f"sentinel_agents_most_recent_seen_age_seconds {extra['agents_most_recent_seen_age']}",
+    ]
+    for path, count in metrics_data["requests_by_path"].items():
+        safe_path = path.replace("/", "_").strip("_")
+        lines.append(f'sentinel_requests_path_total{{path="{path}"}} {count}')
+    return Response("\n".join(lines), media_type="text/plain")
+# ---- end metrics enrichment ----
+
+@app.get("/version", tags=["meta"])
+def version_endpoint():
+    return {
+        "name": version.NAME,
+        "env": version.ENV,
+        "commit": version.COMMIT,
+        "boot_time": version.BOOT_TIME,
+    }
+
+@app.middleware("http")
+async def guard_and_metrics_middleware(request: Request, call_next):
+    # lazy init metrics
+    st = getattr(app.state, "metrics", None)
+    if st is None:
+        st = app.state.metrics = {
+            "request_count": 0,
+            "status_2xx": 0,
+            "status_4xx": 0,
+            "status_5xx": 0,
+        }
+        try:
+            from . import version as _v
+            app.state.boot_time = getattr(_v, "BOOT_TIME", None)
+        except Exception:
+            app.state.boot_time = None
+
+    st["request_count"] += 1
+
+    # --- auth guard (health open; everything else requires key)
+    try:
+        if request.url.path not in AUTH_OPEN_PATHS:
+            # keep both headers supported
+            from .security import verify_api_key
+            await verify_api_key(request)
+    except HTTPException as e:
+        # count and re-raise (FastAPI will render 401/403)
+        if 400 <= e.status_code < 500:
+            st["status_4xx"] += 1
+        elif e.status_code >= 500:
+            st["status_5xx"] += 1
+        raise
+
+    # --- call downstream and tally
+    try:
+        response = await call_next(request)
+        code = getattr(response, "status_code", 200)
+        if 200 <= code < 300:
+            st["status_2xx"] += 1
+        elif 400 <= code < 500:
+            st["status_4xx"] += 1
+        elif code >= 500:
+            st["status_5xx"] += 1
+        return response
+    except HTTPException as e:
+        # also tally raised downstream HTTPExceptions
+        if 400 <= e.status_code < 500:
+            st["status_4xx"] += 1
+        elif e.status_code >= 500:
+            st["status_5xx"] += 1
+        raise
+    except Exception:
+        st["status_5xx"] += 1
+        raise
+
+# simple JSON metrics
+try:
+    from fastapi import APIRouter
+    _mx_router = APIRouter()
+    @_mx_router.get("/metrics", tags=["meta"])
+    def _metrics():
+        import time
+        m = getattr(app.state, "metrics", {"request_count":0,"status_2xx":0,"status_4xx":0,"status_5xx":0})
+        bt = getattr(app.state, "boot_time", None)
+        uptime = None
+        if bt:
+            try:
+                from datetime import datetime, timezone
+                # BOOT_TIME stored as ISO + Z
+                t0 = datetime.fromisoformat(bt.rstrip("Z")).replace(tzinfo=timezone.utc)
+                uptime = (datetime.now(timezone.utc) - t0).total_seconds()
+            except Exception:
+                pass
+        return {**m, "uptime_seconds": uptime}
+    app.include_router(_mx_router)
+except Exception:
+    pass
+
+app.include_router(orchestrator_agent_mvp.router)
+
+
+# ---- appended by patch: simple in-memory metrics ----
+from typing import Dict
+
+class _Metrics:
+    def __init__(self):
+        from datetime import datetime
+        self.total = 0
+        self.errors = 0
+        self.started_at = datetime.utcnow()
+    def inc_total(self):
+        self.total += 1
+    def inc_errors(self):
+        self.errors += 1
+    def snapshot(self) -> Dict[str, float]:
+        from datetime import datetime
+        return {
+            "total": self.total,
+            "errors": self.errors,
+            "uptime_s": float((datetime.utcnow() - self.started_at).total_seconds()),
+        }
+
+METRICS = _Metrics()
+
+try:
+    # expose a stable /metrics even if an older one existed
+    @app.get("/metrics")
+    def metrics_view():
+        return METRICS.snapshot()
+except Exception:
+    # app might not be defined yet if this file structure differs;
+    # endpoint above will be skipped in that rare case.
+    pass
+
+try:
+    # lightweight metrics wrapper; counts requests and errors
+    @app.middleware("http")
+    async def _safe_metrics_middleware(request, call_next):
+        METRICS.inc_total()
+        try:
+            resp = await call_next(request)
+            return resp
+        except Exception:
+            METRICS.inc_errors()
+            raise
+except Exception:
+    pass
+# ---- end appended by patch ----
+
+
+
+
+try:
+    app.include_router(jobs_router)
+except NameError:
+    pass
+

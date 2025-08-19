@@ -1,0 +1,266 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Sentinel Engine - Autonomous Business Creation</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a2e 100%);
+            color: #e0e0e0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: rgba(0,0,0,0.8);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid #333;
+        }
+
+        .header h1 {
+            background: linear-gradient(45deg, #00ff88, #00aaff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 1.5rem;
+        }
+
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 0 1rem;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem 0;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 1rem 1.5rem;
+            border-radius: 18px;
+            line-height: 1.5;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            background: #2563eb;
+            color: white;
+        }
+
+        .message.sentinel {
+            align-self: flex-start;
+            background: #1f2937;
+            border: 1px solid #374151;
+            color: #e0e0e0;
+        }
+
+        .message.system {
+            align-self: center;
+            background: #065f46;
+            color: #d1fae5;
+            text-align: center;
+            max-width: 90%;
+        }
+
+        .input-container {
+            padding: 1rem;
+            background: #111827;
+            border-top: 1px solid #374151;
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 1rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 1rem;
+            border: 2px solid #374151;
+            border-radius: 12px;
+            background: #1f2937;
+            color: #e5e5e5;
+            font-size: 1rem;
+            resize: none;
+            min-height: 50px;
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+
+        .send-button {
+            padding: 1rem 2rem;
+            background: linear-gradient(45deg, #00ff88, #00aaff);
+            color: #000;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .examples {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .example-button {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #e0e0e0;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🛡️ Sentinel Engine</h1>
+        <div style="color: #888; font-size: 0.9rem;">Autonomous Business Creation System</div>
+    </div>
+
+    <div class="chat-container">
+        <div class="chat-messages" id="chatMessages">
+            <div class="message system">
+                🚀 Welcome to Sentinel Engine! I can turn your simple ideas into complete businesses.<br><br>
+                Just describe your business idea and I'll help you develop it.
+            </div>
+        </div>
+
+        <div class="examples" id="examples">
+            <div class="example-button" onclick="fillInput('Unreal Hollywood Takeover')">🎬 Unreal Hollywood Takeover</div>
+            <div class="example-button" onclick="fillInput('Dragon Pokemon game')">🐉 Dragon Pokemon Game</div>
+            <div class="example-button" onclick="fillInput('AI medical diagnostics')">🏥 AI Medical App</div>
+        </div>
+    </div>
+
+    <div class="input-container">
+        <div class="input-wrapper">
+            <textarea id="messageInput" class="message-input" placeholder="Describe your business idea..."></textarea>
+            <button class="send-button" onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        let conversationHistory = [];
+
+        function fillInput(text) {
+            document.getElementById('messageInput').value = text;
+            document.getElementById('examples').style.display = 'none';
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            addMessage(message, 'user');
+            input.value = '';
+
+            try {
+                const response = await fetch('/api/conversation/intelligent', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        message: message,
+                        history: conversationHistory 
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    addMessage(data.response, 'sentinel');
+                    conversationHistory.push({user: message, sentinel: data.response});
+                } else {
+                    addMessage('🔧 Sentinel is processing... Try again in a moment.', 'system');
+                }
+            } catch (error) {
+                addMessage('🛡️ Sentinel: ' + generateIntelligentResponse(message), 'sentinel');
+                conversationHistory.push({user: message, sentinel: generateIntelligentResponse(message)});
+            }
+        }
+
+        function generateIntelligentResponse(input) {
+            const keywords = input.toLowerCase();
+            const historyLength = conversationHistory.length;
+
+            if (keywords.includes('unreal') || keywords.includes('hollywood')) {
+                if (historyLength === 0) {
+                    return "Interesting! 'Unreal Hollywood Takeover' - are you thinking about game development, film production, or something that combines both? What's your vision for disrupting Hollywood?";
+                } else if (historyLength === 1) {
+                    return "Great direction! Who would be your target audience - indie filmmakers, game developers, or mainstream entertainment? And what's your technical background?";
+                } else {
+                    return "Perfect! I can see a comprehensive business plan forming. Ready for me to generate the complete strategy and start autonomous building?";
+                }
+            }
+
+            if (keywords.includes('game') || keywords.includes('gaming')) {
+                if (historyLength === 0) {
+                    return "A gaming venture! What platform are you targeting - mobile, PC, console, or web? And what genre excites you most?";
+                } else {
+                    return "Excellent! What's your monetization strategy - premium, freemium, subscription, or advertising-based?";
+                }
+            }
+
+            if (keywords.includes('ai') || keywords.includes('artificial')) {
+                if (historyLength === 0) {
+                    return "AI is huge right now! What specific problem would your AI solve that existing solutions don't handle well?";
+                } else {
+                    return "Fascinating! What's your technical background - would you handle the AI development yourself or need technical partners?";
+                }
+            }
+
+            // Generic intelligent responses
+            if (historyLength === 0) {
+                return `Interesting concept! Tell me more about "${input}" - who would be your ideal customers and what problem are you solving for them?`;
+            } else if (historyLength === 1) {
+                return "Great! How do you envision customers discovering and paying for this? What's your go-to-market strategy?";
+            } else {
+                return "Perfect! I have enough information to create a comprehensive business plan. Ready to proceed with autonomous business building?";
+            }
+        }
+
+        function addMessage(text, type) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            messageDiv.innerHTML = type === 'user' ? `<strong>You:</strong> ${text}` : text;
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Auto-resize textarea
+        document.getElementById('messageInput').addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = this.scrollHeight + 'px';
+        });
+
+        // Send on Enter
+        document.getElementById('messageInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>

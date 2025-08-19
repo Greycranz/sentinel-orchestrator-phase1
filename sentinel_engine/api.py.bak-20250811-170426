@@ -1,0 +1,188 @@
+# --- API key guard (ordered, Annotated) ---
+def verify_api_key(
+    request: Request,  # required first
+    x_api_key: Annotated[str | None, Header(alias="X-API-Key")] = None,
+    authorization: Annotated[str | None, Header(alias="Authorization")] = None,
+):
+    expected = os.getenv("SENTINEL_API_KEY")
+    if not expected:
+        try:
+            env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env")
+            if os.path.exists(env_path):
+                with open(env_path, "r", encoding="utf-8") as f:
+                    for line in f:
+                        s = line.strip()
+                        if not s or s.startswith("#") or "=" not in s:
+                            continue
+                        k, val = s.split("=",1)
+                        if k.strip() == "SENTINEL_API_KEY":
+                            expected = val.strip().strip("'").strip('"')
+                            break
+        except Exception:
+            pass
+
+    token = None
+    if authorization and authorization.lower().startswith("bearer "):
+        token = authorization.split(" ",1)[1].strip()
+    elif x_api_key:
+        token = x_api_key.strip()
+
+    if not expected or not token or token != expected:
+        try:
+            client = request.client.host if request and request.client else ""
+            write_audit("auth_failed", 401, request.url.path if request else "", request.method if request else "", client, {"reason":"bad or missing key"})
+        except Exception:
+            pass
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
+    return True
+from typing import Annotated
+import os
+from datetime import datetime
+from fastapi import FastAPI, Depends, HTTPException, status, Header, Request
+from sqlalchemy import text
+from .db import get_engine
+
+# -------- Audit (local JSONL) --------
+def _audit_path() -> str:
+    base = os.path.join(os.path.dirname(os.path.dirname(__file__)), "ops", "logs")
+    os.makedirs(base, exist_ok=True)
+    day = datetime.utcnow().strftime("%Y%m%d")
+    return os.path.join(base, f"audit-{day}.jsonl")
+
+def write_audit(event: str, status_code: int, path: str, method: str, client: str = "", detail: dict | None = None):
+    try:
+        rec = {
+            "ts": datetime.utcnow().isoformat() + "Z",
+            "event": event,
+            "status": status_code,
+            "path": path,
+            "method": method,
+            "client": client,
+        }
+        if detail:
+            rec["detail"] = detail
+        with open(_audit_path(), "a", encoding="utf-8") as f:
+            import json
+            f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+    except Exception:
+        pass
+
+app = FastAPI()
+
+def _env_api_key() -> str | None:
+    v = os.getenv("SENTINEL_API_KEY")
+    if v:
+        return v
+    try:
+        env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env")
+        if os.path.exists(env_path):
+            with open(env_path, "r", encoding="utf-8") as f:
+                for line in f:
+                    s = line.strip()
+                    if not s or s.startswith("#") or "=" not in s:
+                        continue
+                    k, val = s.split("=",1)
+                    if k.strip() == "SENTINEL_API_KEY":
+                        return val.strip().strip("'").strip('"')
+    except Exception:
+        pass
+    return None
+
+# -------- Guard (Request REQUIRED; no Optional/Union) --------
+def verify_api_key(
+    request: Request,
+    x_api_key: str | None = Header(default=None, alias="X-API-Key"),
+    authorization: str | None = Header(default=None, alias="Authorization"),
+):
+    expected = _env_api_key()
+    token = None
+    if authorization and authorization.lower().startswith("bearer "):
+        token = authorization.split(" ",1)[1].strip()
+    elif x_api_key:
+        token = x_api_key.strip()
+    if not expected or not token or token != expected:
+        try:
+            client = request.client.host if request and request.client else ""
+            write_audit("auth_failed", 401, request.url.path if request else "", request.method if request else "", client, {"reason":"bad or missing key"})
+        except Exception:
+            pass
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
+    return True
+
+# -------- Health --------
+@app.get("/healthz")
+def healthz():
+    return {"status":"ok"}
+
+@app.get("/healthz/live")
+def health_live():
+    return {"live": True}
+
+@app.get("/healthz/ready")
+def health_ready():
+    try:
+        e = get_engine()
+        with e.connect() as conn:
+            conn.execute(text("SELECT 1"))
+        return {"ready": True}
+    except Exception as ex:
+        raise HTTPException(status_code=503, detail=f"not ready: {ex}")
+
+# -------- Audit Middleware --------
+@app.middleware("http")
+async def _audit_middleware(request: Request, call_next):
+    resp = None
+    try:
+        resp = await call_next(request)
+        return resp
+    finally:
+        try:
+            path = str(request.url.path)
+            if path.startswith("/tenants/") and path.endswith("/enable"):
+                client = request.client.host if request and request.client else ""
+                status_code = resp.status_code if resp else 500
+                write_audit("team_enable", status_code, path, request.method, client)
+        except Exception:
+            pass
+
+# -------- Teams endpoints --------
+@app.post("/tenants/{tenant_id}/teams/{team}/enable", dependencies=[Depends(verify_api_key)])
+def enable_team(tenant_id: int, team: str, enabled: bool = True):
+    now = datetime.utcnow().isoformat() + "Z"
+    e = get_engine()
+    with e.begin() as conn:
+        conn.execute(
+            text("""
+                INSERT INTO teams (tenant_id, name, enabled, updated_at)
+                VALUES (:tid, :name, :enabled, :ts)
+                ON CONFLICT(tenant_id, name) DO UPDATE
+                   SET enabled=excluded.enabled, updated_at=excluded.updated_at
+            """),
+            {"tid": tenant_id, "name": team, "enabled": 1 if enabled else 0, "ts": now},
+        )
+        row = conn.execute(
+            text("SELECT id, tenant_id, name, enabled, updated_at FROM teams WHERE tenant_id=:tid AND name=:name"),
+            {"tid": tenant_id, "name": team},
+        ).mappings().first()
+        return {
+            "id": row["id"],
+            "tenant_id": row["tenant_id"],
+            "team": row["name"],
+            "enabled": bool(row["enabled"]),
+            "updated_at": row["updated_at"],
+        }
+
+@app.get("/tenants/{tenant_id}/teams")
+def list_teams(tenant_id: int):
+    e = get_engine()
+    with e.connect() as conn:
+        rows = conn.execute(
+            text("SELECT id, tenant_id, name, enabled, updated_at FROM teams WHERE tenant_id=:tid ORDER BY name"),
+            {"tid": tenant_id},
+        ).mappings().all()
+        return [
+            {"id": r["id"], "tenant_id": r["tenant_id"], "team": r["name"], "enabled": bool(r["enabled"]), "updated_at": r["updated_at"]}
+            for r in rows
+        ]
+
+

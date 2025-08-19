@@ -1,0 +1,28 @@
+from sqlalchemy import create_engine, text
+from sqlalchemy.engine import Engine
+import os
+
+_engine: Engine | None = None
+
+def get_engine() -> Engine:
+    global _engine
+    if _engine is not None:
+        return _engine
+    base = os.path.dirname(os.path.dirname(__file__))
+    db_path = os.path.join(base, "ops", "data")
+    os.makedirs(db_path, exist_ok=True)
+    uri = f"sqlite:///{os.path.join(db_path, 'sentinel.sqlite')}"
+    _engine = create_engine(uri, future=True)
+    # bootstrap schema
+    with _engine.begin() as conn:
+        conn.exec_driver_sql("""
+        CREATE TABLE IF NOT EXISTS teams (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tenant_id INTEGER NOT NULL,
+            name TEXT NOT NULL,
+            enabled INTEGER NOT NULL,
+            updated_at TEXT NOT NULL,
+            UNIQUE(tenant_id, name)
+        );
+        """)
+    return _engine

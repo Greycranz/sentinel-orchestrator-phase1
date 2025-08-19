@@ -1,0 +1,218 @@
+﻿from __future__ import annotations
+from sqlalchemy import create_engine, text
+from sqlalchemy.engine import Engine
+from datetime import datetime
+import json, os
+from typing import Optional, Dict, Any, List
+
+from .config import settings
+# engine init deferred
+def init_db():
+    with engine.begin() as conn:
+        conn.execute(text("""
+        CREATE TABLE IF NOT EXISTS tasks (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            description TEXT,
+            priority INTEGER NOT NULL,
+            requester TEXT NOT NULL,
+            status TEXT NOT NULL,
+            data TEXT,
+            tenant_id INTEGER,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        );
+        """))
+        conn.execute(text("""
+        CREATE TABLE IF NOT EXISTS tenants (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL UNIQUE,
+            plan TEXT NOT NULL,
+            safety_mode TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            root TEXT
+        );
+        """))
+        # Add root column if missing
+        cols = [r[1] for r in conn.execute(text("PRAGMA table_info(tenants)")).all()]
+        if "root" not in cols:
+            conn.execute(text("ALTER TABLE tenants ADD COLUMN root TEXT"))
+        # API keys
+        conn.execute(text("""
+        CREATE TABLE IF NOT EXISTS api_keys (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tenant_id INTEGER NOT NULL,
+            name TEXT NOT NULL,
+            api_key TEXT NOT NULL UNIQUE,
+            quota_per_day INTEGER DEFAULT 10000,
+            last_used_at TEXT,
+            is_active INTEGER DEFAULT 1,
+            created_at TEXT NOT NULL
+        );
+        """))
+
+def now_iso() -> str:
+    return datetime.utcnow().isoformat()
+
+# ----- Tenants -----
+def _tenant_root_path(tenant_id: int) -> str:
+    base = os.path.abspath("./tenants")
+    os.makedirs(base, exist_ok=True)
+    root = os.path.join(base, str(tenant_id))
+    os.makedirs(root, exist_ok=True)
+    return root
+
+def create_tenant(name: str, plan: str, safety_mode: str) -> int:
+    with engine.begin() as conn:
+        res = conn.execute(
+            text("""
+                INSERT INTO tenants (name, plan, safety_mode, created_at)
+                VALUES (:name, :plan, :safety_mode, :created_at)
+            """),
+            {"name": name, "plan": plan, "safety_mode": safety_mode, "created_at": now_iso()},
+        )
+        tid = res.lastrowid
+        root = _tenant_root_path(tid)
+        conn.execute(text("UPDATE tenants SET root=:root WHERE id=:id"), {"root": root, "id": tid})
+        return tid
+
+def get_tenant(tenant_id: int) -> Optional[Dict[str, Any]]:
+    with engine.begin() as conn:
+        row = conn.execute(text("SELECT * FROM tenants WHERE id=:id"), {"id": tenant_id}).mappings().first()
+        return dict(row) if row else None
+
+def list_tenants(limit: int = 200) -> List[Dict[str, Any]]:
+    with engine.begin() as conn:
+        rows = conn.execute(text("SELECT * FROM tenants ORDER BY id DESC LIMIT :limit"), {"limit": limit}).mappings().all()
+        return [dict(r) for r in rows]
+
+# ----- API Keys -----
+def create_api_key(tenant_id: int, name: str, api_key: str, quota_per_day: int = 10000) -> int:
+    with engine.begin() as conn:
+        res = conn.execute(
+            text("""
+                INSERT INTO api_keys (tenant_id, name, api_key, quota_per_day, created_at)
+                VALUES (:tenant_id, :name, :api_key, :quota_per_day, :created_at)
+            """),
+            {"tenant_id": tenant_id, "name": name, "api_key": api_key, "quota_per_day": quota_per_day, "created_at": now_iso()},
+        )
+        return res.lastrowid
+
+def list_api_keys(tenant_id: int) -> List[Dict[str, Any]]:
+    with engine.begin() as conn:
+        rows = conn.execute(text("SELECT * FROM api_keys WHERE tenant_id=:tenant_id"), {"tenant_id": tenant_id}).mappings().all()
+        return [dict(r) for r in rows]
+
+def get_apikey_by_value(api_key: str) -> Optional[Dict[str, Any]]:
+    with engine.begin() as conn:
+        row = conn.execute(text("SELECT * FROM api_keys WHERE api_key=:api_key"), {"api_key": api_key}).mappings().first()
+        return dict(row) if row else None
+
+def touch_apikey_usage(apikey_id: int):
+    with engine.begin() as conn:
+        conn.execute(text("UPDATE api_keys SET last_used_at=:ts WHERE id=:id"), {"ts": now_iso(), "id": apikey_id})
+
+# ----- Tasks -----
+def create_task(title: str, description: str|None, priority: int, requester: str, data: Dict[str,Any]|None=None, tenant_id: int|None=None) -> int:
+    with engine.begin() as conn:
+        res = conn.execute(
+            text("""
+                INSERT INTO tasks (title, description, priority, requester, status, data, tenant_id, created_at, updated_at)
+                VALUES (:title, :description, :priority, :requester, :status, :data, :tenant_id, :created_at, :updated_at)
+            """),
+            {
+                "title": title,
+                "description": description,
+                "priority": priority,
+                "requester": requester,
+                "status": "queued",
+                "data": json.dumps(data) if data else None,
+                "tenant_id": tenant_id,
+                "created_at": now_iso(),
+                "updated_at": now_iso(),
+            },
+        )
+        return res.lastrowid
+
+def get_task(task_id: int) -> Optional[Dict[str, Any]]:
+    with engine.begin() as conn:
+        res = conn.execute(text("SELECT * FROM tasks WHERE id=:id"), {"id": task_id}).mappings().first()
+        return dict(res) if res else None
+
+def list_tasks(limit: int = 100) -> List[Dict[str, Any]]:
+    with engine.begin() as conn:
+        res = conn.execute(text("SELECT * FROM tasks ORDER BY id DESC LIMIT :limit"), {"limit": limit}).mappings().all()
+        return [dict(r) for r in res]
+
+def update_task_status(task_id: int, status: str, data_update: Optional[Dict[str, Any]] = None):
+    with engine.begin() as conn:
+        existing = conn.execute(text("SELECT data FROM tasks WHERE id=:id"), {"id": task_id}).first()
+        current_data = None
+        if existing and existing[0]:
+            try:
+                current_data = json.loads(existing[0])
+            except json.JSONDecodeError:
+                current_data = None
+        if data_update:
+            merged = (current_data or {})
+            merged.update(data_update)
+            data_str = json.dumps(merged)
+        else:
+            data_str = json.dumps(current_data) if current_data else None
+
+        conn.execute(
+            text("""
+                UPDATE tasks
+                SET status=:status, data=:data, updated_at=:updated_at
+                WHERE id=:id
+            """),
+            {"id": task_id, "status": status, "data": data_str, "updated_at": now_iso()},
+        )
+
+def next_queued_task() -> Optional[Dict[str, Any]]:
+    with engine.begin() as conn:
+        res = conn.execute(
+            text("""
+                SELECT * FROM tasks
+                WHERE status='queued'
+                ORDER BY priority DESC, id ASC
+                LIMIT 1
+            """),
+        ).mappings().first()
+        return dict(res) if res else None
+
+
+from sqlalchemy import text
+
+def list_tenant_teams(tenant_id: int):
+    with engine.begin() as conn:
+        rows = conn.execute(
+            text("""
+                SELECT t.name, tt.enabled, tt.created_at
+                FROM tenant_teams tt
+                JOIN teams t ON t.id = tt.team_id
+                WHERE tt.tenant_id = :tid
+                ORDER BY t.name
+            """),
+            {"tid": tenant_id},
+        ).mappings().all()
+    return [dict(r) for r in rows]
+
+_ENGINE: Engine | None = None
+
+def get_engine() -> Engine:
+    global _ENGINE
+    if _ENGINE is not None:
+        return _ENGINE
+    url = settings.database_url or database_url_fallback()
+    _ENGINE = create_engine(url, echo=False, future=True)
+    return _ENGINE
+
+def db_ping() -> bool:
+    try:
+        e = get_engine()
+        with e.connect() as conn:
+            conn.execute(text("SELECT 1"))
+        return True
+    except Exception:
+        return False

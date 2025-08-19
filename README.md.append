@@ -1,0 +1,20 @@
+
+## Phase 4 – Security & Access + SpeedOps
+
+### New
+- API keys per tenant: `POST /tenants/{id}/apikeys`, `GET /tenants/{id}/apikeys`
+- Basic auth on `/ui/approvals` when env `UI_ADMIN_PASSWORD` is set
+- Rate limit: 60 req/min per API key
+- Rollback: `POST /tasks/{id}/rollback`
+- Request timing & counters in Prometheus (`/metrics`)
+
+### Using API keys
+1) Create tenant → create API key:
+```
+POST /tenants/{tenant_id}/apikeys
+-> { api_key: "..." }
+```
+2) Use header on secured endpoints:
+```
+X-API-Key: <the key>
+```
